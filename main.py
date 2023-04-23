@@ -15,11 +15,12 @@ if __name__ == "__main__":
     bg_clr = (2, 152, 219)
 
     # images
-    platform = pygame.image.load("assets/platform.png").convert_alpha()
+    platform_img = pygame.image.load("assets/platform.png").convert_alpha()
     start_surface = pygame.image.load("assets/start_surface.png").convert_alpha()
     character_img = pygame.image.load("assets/character.png").convert_alpha() # default image for the character
-    character_left = pygame.image.load("assets/character_left.png") # character moving left image
-    character_right = pygame.image.load("assets/character_right.png") # character moving right image
+    character_left = pygame.image.load("assets/character_left.png").convert_alpha() # character moving left image
+    character_right = pygame.image.load("assets/character_right.png").convert_alpha() # character moving right image
+    character_debug = pygame.image.load("assets/debug_character.png").convert_alpha()
 
     #character
     char_width = character_img.get_width()
@@ -35,16 +36,17 @@ if __name__ == "__main__":
     jumping = False
 
     #platform generation
-    platform_count = 10
+    platform_count = 5
+    list_of_platform_dicts = []
     for i in range(platform_count):
-        platforms_x = [0, 100, 200, 300, 400, 500]
-        platforms_y = []
-        platforms = []
-        platform_x = random.choice(platforms_x)
-        platform_y = random.randint(0, 1000)
-        
-        
+        x_pos_of_platforms = [0, 100, 200, 300, 400] # možné pozice platforem na ose x
 
+        platform_x = random.choice(x_pos_of_platforms)
+        platform_y = random.randrange(450, 950, 50)
+        platform = {'x':platform_x, 'y':platform_y}
+        list_of_platform_dicts.append(platform)
+
+    
     #start surface
     start_surface_x = 0
     start_surface_y = 950
@@ -52,7 +54,6 @@ if __name__ == "__main__":
     #main loop function
     clock = pygame.time.Clock()
     program = True
-    game = True # POZDĚJI UPRAVIT NA SWITCH (po přidání před-herního menu s tlačítky atd.)
 
     while program:
         for event in pygame.event.get():
@@ -61,25 +62,22 @@ if __name__ == "__main__":
                 pygame.quit()
 
         # character moving
-        keys = pygame.key.get_pressed() # getting dictionary of key inputs
+        keys = pygame.key.get_pressed() # getting key inputs
 
-        if keys[pygame.K_LEFT] and char_pos_x > 0: 
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and char_pos_x > 0: 
             char_pos_x -= 8
             character = character_left
         
 
-        if keys[pygame.K_RIGHT] and char_pos_x < screen_width - char_width:
+        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and char_pos_x < screen_width - char_width:
             char_pos_x += 8
             character = character_right
 
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]:
             jumping = True
         
-        for current_platform_y in platforms_y:
-            if char_bottom == current_platform_y:
-                jumping = True
         
-        if jumping:     # adding gravity to the character
+        if jumping: # adding jumping to the character
             char_pos_y -= y_velocity
             y_velocity -= y_gravity
             if y_velocity < -jump_height:
@@ -88,12 +86,26 @@ if __name__ == "__main__":
 
         screen.fill(bg_clr)
         screen.blit(start_surface, (start_surface_x, start_surface_y))
-        screen.blit(platform, (platform_x, platform_y))
-        screen.blit(character, (char_pos_x, char_pos_y))
+
+        # drawing platforem
+        for dict_in_list in list_of_platform_dicts:
+            platform_rect = pygame.Rect(dict_in_list['x'], dict_in_list['y'], 100, 25)
+            screen.blit(platform_img, platform_rect)
+            
+        # drawing character
+        character_rect = pygame.Rect(char_pos_x, char_pos_y, 70, 70)
+        screen.blit(character, character_rect)
+
+        #collision
+        if character_rect.colliderect(platform_rect):
+            print("KOLIZE!!!!!!")
 
         character = character_img # setting back the default image for character
 
         pygame.display.flip()
         pygame.display.update()
-        clock.tick(60) #frames per second
+        clock.tick(60) # FPS
 
+# OPRAVY
+# 1) Kolize hráče funguje pouze pro první vygenerovanou plošinu, pro další potom ne. 
+#   ---> potřeba opravit věci s Rect a get_rect() a jejich kolize
