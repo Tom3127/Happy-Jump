@@ -50,6 +50,9 @@ if __name__ == "__main__":
     start_surface_x = 0
     start_surface_y = 950
 
+    # score counter
+    score = 0
+
     #main loop function
     clock = pygame.time.Clock()
     program = True
@@ -66,7 +69,6 @@ if __name__ == "__main__":
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and char_pos_x > 0: 
             char_pos_x -= 8
             player = character_left
-        
 
         if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and char_pos_x < screen_width - char_width:
             char_pos_x += 8
@@ -86,19 +88,21 @@ if __name__ == "__main__":
         screen.fill(bg_clr)
         screen.blit(start_surface, (start_surface_x, start_surface_y))
 
-        # drawing platforem
+        # getting player rect
+        character_rect = pygame.Rect(char_pos_x, char_pos_y, 70, 70)
+        
+
+        # drawing platforms and checking collision
         for dict_in_list in list_of_platform_dicts:
             platform_rect = pygame.Rect(dict_in_list['x'], dict_in_list['y'], 100, 25)
             screen.blit(platform_img, platform_rect)
-            
-        # drawing player
-        character_rect = pygame.Rect(char_pos_x, char_pos_y, 70, 70)
+            if character_rect.colliderect(platform_rect):
+                score += 1
+                # get thing position in list and then remove it from list
+
+        # displaying player
         screen.blit(player, character_rect)
-
-        #collision
-        if character_rect.colliderect(platform_rect):
-            print("KOLIZE!!!!!!")
-
+            
         player = character_img # setting back the default image for player
 
         pygame.display.flip()
@@ -106,5 +110,6 @@ if __name__ == "__main__":
         clock.tick(60) # FPS
 
 # OPRAVY
-# 1) Kolize hráče funguje pouze pro první vygenerovanou plošinu, pro další potom ne. 
-#   ---> potřeba opravit věci s Rect a get_rect() a jejich kolize
+
+# Graficky předělat a) pixel art obrázky
+#                   b) postavu hráče
