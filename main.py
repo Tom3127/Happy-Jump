@@ -26,13 +26,13 @@ if __name__ == "__main__":
     #player
     char_width = character_img.get_width()
     char_height = character_img.get_height()
-    char_pos_x = 990
+    char_pos_x = 922.5
     char_pos_y = 960
     player = character_img
     player_speed = 15
 
-    y_gravity = 1
-    jump_height = 38
+    y_gravity = 2
+    jump_height = 55
     y_velocity = jump_height
     jumping = False
 
