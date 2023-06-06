@@ -23,16 +23,22 @@ if __name__ == "__main__":
     character_right = pygame.image.load("assets/player_right.png").convert_alpha() # player moving right image
     character_debug = pygame.image.load("assets/player_debug.png").convert_alpha() # image of debug player
 
+    #start surface
+    start_surface_x = 0
+    start_surface_y = 1030
+    start_surface_height = start_surface.get_height()
+
     #player
     char_width = character_img.get_width()
     char_height = character_img.get_height()
     char_pos_x = 922.5
-    char_pos_y = 960
+    char_pos_y_default = screen_height - char_height - start_surface_height
+    char_pos_y = char_pos_y_default
     player = character_img
     player_speed = 15
 
-    y_gravity = 2
-    jump_height = 55
+    y_gravity = 1.5
+    jump_height = 48
     y_velocity = jump_height
     jumping = False
 
@@ -43,65 +49,56 @@ if __name__ == "__main__":
     list_of_coin_dicts = []
     for i in range(coin_count):
         coin_x = random.randrange(0, 1870, 50)
-        coin_y = random.randrange(200, 905, 50)
+        coin_y = random.randrange(200, 900, 50)
         coin = {'x':coin_x, 'y':coin_y}
         list_of_coin_dicts.append(coin)
 
-    #start surface
-    start_surface_x = 0
-    start_surface_y = 1030
-
     # score counter
     score = 0
-    font = pygame.font.SysFont('Comic Sans MS', 100)
+    font = pygame.font.SysFont('Comic Sans MS', 75)
     
-    #main loop 
+    # main loop 
     clock = pygame.time.Clock()
-    program = True
+    game = True
 
-    while program:
+    while game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                program = False
+                game = False
                 quit()
 
-        # player moving
+        # player movement
         keys = pygame.key.get_pressed() # getting key inputs
-
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and char_pos_x > 0: 
             char_pos_x -= player_speed
             player = character_left
 
-        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and char_pos_x < screen_width - char_width:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and char_pos_x < screen_width - char_width:
             char_pos_x += player_speed
             player = character_right
 
         if keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]:
             jumping = True
-        
-        
-        if jumping: # adding jumping to the player
+
+        if jumping: 
             char_pos_y -= y_velocity
             y_velocity -= y_gravity
             if y_velocity < -jump_height:
                 jumping = False
                 y_velocity = jump_height
-
         screen.fill(bg_clr)
         screen.blit(start_surface, (start_surface_x, start_surface_y))
-
         # getting player rect
-        character_rect = pygame.Rect(char_pos_x, char_pos_y, 70, 70)
+        character_rect = pygame.Rect(char_pos_x, char_pos_y, char_width, char_height)
         
-
-        # drawing soins and checking collision
+        # drawing coins and checking collision
         for dict_in_list in list_of_coin_dicts:
             coin_rect = pygame.Rect(dict_in_list['x'], dict_in_list['y'], coin_width, coin_height)
             screen.blit(coin_img, coin_rect)
+
             if character_rect.colliderect(coin_rect):
                 coin_index = list_of_coin_dicts.index(dict_in_list)
                 score += 1
-                print('KOLIZE!!!')
                 list_of_coin_dicts.pop(coin_index)
 
         # displaying player
@@ -109,20 +106,16 @@ if __name__ == "__main__":
         player = character_img # setting back the default image for player
 
         text_surface = font.render(f'Score: {score}', False, (255, 255, 255))
-        screen.blit(text_surface, (30,0))
 
+        screen.blit(text_surface, (30,0))
+        # detecting if there are any coins left
         if not(list_of_coin_dicts):
             for i in range(coin_count):
                 coin_x = random.randrange(0, 1870, 50)
                 coin_y = random.randrange(200, 905, 50)
                 coin = {'x':coin_x, 'y':coin_y}
                 list_of_coin_dicts.append(coin)
-
         pygame.display.flip()
         pygame.display.update()
         clock.tick(60) # FPS
 
-# OPRAVY
-
-# Graficky předělat a) pixel art obrázky
-#                   b) postavu hráče
